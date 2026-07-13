@@ -1,0 +1,50 @@
+﻿@model List<OnlineShop.Models.Product>
+
+@{
+    ViewData["Title"] = "محصولات";
+}
+
+<h2 class="mb-4">محصولات این دسته</h2>
+
+@if (!Model.Any())
+{
+    <h4>محصولی برای این دسته وجود ندارد.</h4>
+}
+else
+{
+    <div class="row">
+
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-3">
+
+                <div class="card shadow-sm">
+
+                    <div class="card-body">
+
+                        <h4>@item.Name</h4>
+
+                        <p>
+                            قیمت:
+                            @item.Price.ToString("N0") تومان
+                        </p>
+
+                        <p>
+                            موجودی:
+                            @item.Stock
+                        </p>
+
+                        <p>
+                            دسته:
+                            @item.Category.Name
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}

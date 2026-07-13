@@ -1,34 +1,37 @@
-﻿@model IEnumerable<OnlineShop.Models.Product>
+﻿@model List<OnlineShop.Models.Category>
 
-<h2>محصولات</h2>
+@{
+    ViewData["Title"] = "دسته‌بندی محصولات";
+}
 
-<table class="table table-bordered">
+<h2 class="mb-4">دسته‌بندی محصولات</h2>
 
-    <tr>
-
-        <th>نام</th>
-
-        <th>قیمت</th>
-
-        <th>موجودی</th>
-
-        <th>دسته بندی</th>
-
-    </tr>
+<div class="row">
 
     @foreach (var item in Model)
     {
-        <tr>
+        <div class="col-md-4 mb-3">
 
-            <td>@item.Name</td>
+            <div class="card shadow-sm">
 
-            <td>@item.Price.ToString("N0") تومان</td>
+                <div class="card-body text-center">
 
-            <td>@item.Stock</td>
+                    <h4>@item.Name</h4>
 
-            <td>@item.Category.Name</td>
+                    <a asp-controller="Products"
+                       asp-action="ByCategory"
+                       asp-route-id="@item.Id"
+                       class="btn btn-primary mt-3">
 
-        </tr>
+                        مشاهده محصولات
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
     }
 
-</table>
+</div>

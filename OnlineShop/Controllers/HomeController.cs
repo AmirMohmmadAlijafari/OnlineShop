@@ -13,13 +13,10 @@ namespace OnlineShop.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .ToListAsync();
-
-            return View(products);
+            var categories = _context.Categories.ToList();
+            return View(categories);
         }
     }
 }
