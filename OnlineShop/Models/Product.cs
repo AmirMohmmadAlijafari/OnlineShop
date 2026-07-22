@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineShop.Models
@@ -13,14 +14,16 @@ namespace OnlineShop.Models
 
         public string? Description { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
+        [Column(TypeName = "decimal(18,0)")]
         public decimal Price { get; set; }
 
         public int Stock { get; set; }
 
         public int CategoryId { get; set; }
 
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
+
+        public string? ImageUrl { get; set; }
 
         public bool IsActive { get; set; } = true;
 
@@ -30,6 +33,8 @@ namespace OnlineShop.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public ICollection<ProductImage>? Images { get; set; }
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }
+
     }
 }

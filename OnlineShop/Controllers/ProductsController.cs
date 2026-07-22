@@ -1,26 +1,292 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Data;
+using OnlineShop.Models;
 
-namespace OnlineShop.Controllers
+public class ProductsController : Controller
 {
-    public class ProductsController : Controller
+    private readonly ApplicationDbContext _context;
+    private readonly IWebHostEnvironment _environment;
+
+    public ProductsController(ApplicationDbContext context, IWebHostEnvironment environment)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+        _environment = environment;
+    }
 
-        public ProductsController(ApplicationDbContext context)
+    // نمایش محصولات یک دسته
+    public IActionResult ByCategory(int id)
+    {
+        var products = _context.Products
+            .Include(p => p.Category)
+            .Where(p => p.CategoryId == id && !p.IsDeleted)
+            .ToList();
+
+        return View(products);
+    }
+
+    // لیست محصولات
+    public IActionResult Index(string search, int? categoryId, int page = 1)
+    {
+        int pageSize = 5;
+
+        var products = _context.Products
+            .Include(p => p.Category)
+            .Where(p => !p.IsDeleted)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            _context = context;
+            products = products.Where(p => p.Name.Contains(search));
         }
 
-        public IActionResult ByCategory(int id)
+        if (categoryId.HasValue)
         {
-            var products = _context.Products
-                                   .Include(p => p.Category)
-                                   .Where(p => p.CategoryId == id)
-                                   .ToList();
-
-            return View(products);
+            products = products.Where(p => p.CategoryId == categoryId);
         }
+
+        int totalProducts = products.Count();
+
+        var productList = products
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+
+        ViewBag.Categories = new SelectList(
+            _context.Categories,
+            "Id",
+            "Name",
+            categoryId);
+
+        return View(productList);
+    }
+
+    // جزئیات محصول
+    public IActionResult Details(int id)
+    {
+        var product = _context.Products
+            .Include(p => p.Category)
+            .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return View(product);
+    }
+
+    // فرم افزودن محصول
+    public IActionResult Create()
+    {
+        ViewBag.Categories = new SelectList(
+            _context.Categories,
+            "Id",
+            "Name");
+
+        return View();
+    }
+    // ثبت محصول جدید
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(Product product)
+    {
+        if (product.ImageFile == null)
+        {
+            return Content("ImageFile = NULL");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            string errors = "";
+
+            foreach (var item in ModelState)
+            {
+                foreach (var error in item.Value.Errors)
+                {
+                    errors += item.Key + " : " + error.ErrorMessage + "\n";
+                }
+            }
+
+            return Content(errors);
+        }
+
+        string fileName = Guid.NewGuid().ToString() +
+                          Path.GetExtension(product.ImageFile.FileName);
+
+        string folderPath = Path.Combine(
+            _environment.WebRootPath,
+            "images",
+            "products");
+
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        string filePath = Path.Combine(folderPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            product.ImageFile.CopyTo(stream);
+        }
+
+        product.ImageUrl = "/images/products/" + fileName;
+
+        product.CreatedAt = DateTime.Now;
+        product.UpdatedAt = DateTime.Now;
+        product.IsActive = true;
+        product.IsDeleted = false;
+
+        _context.Products.Add(product);
+        _context.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // فرم ویرایش محصول
+    public IActionResult Edit(int id)
+    {
+        var product = _context.Products
+     .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        ViewBag.Categories = new SelectList(
+            _context.Categories,
+            "Id",
+            "Name",
+            product.CategoryId);
+
+        return View(product);
+    }
+
+    // ویرایش محصول
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(Product product)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Categories = new SelectList(
+                _context.Categories,
+                "Id",
+                "Name",
+                product.CategoryId);
+
+            return View(product);
+        }
+
+        var dbProduct = _context.Products
+    .FirstOrDefault(p => p.Id == product.Id && !p.IsDeleted);
+
+        if (dbProduct == null)
+        {
+            return NotFound();
+        }
+
+        dbProduct.Name = product.Name;
+        dbProduct.Description = product.Description;
+        dbProduct.Price = product.Price;
+        dbProduct.Stock = product.Stock;
+        dbProduct.CategoryId = product.CategoryId;
+        dbProduct.IsActive = product.IsActive;
+        dbProduct.UpdatedAt = DateTime.Now;
+
+        if (product.ImageFile != null)
+        {
+            if (!string.IsNullOrEmpty(dbProduct.ImageUrl))
+            {
+                string oldImagePath = Path.Combine(
+                    _environment.WebRootPath,
+                    dbProduct.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+            }
+
+            string fileName = Guid.NewGuid().ToString() +
+                              Path.GetExtension(product.ImageFile.FileName);
+
+            string folderPath = Path.Combine(
+                _environment.WebRootPath,
+                "images",
+                "products");
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            string filePath = Path.Combine(folderPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                product.ImageFile.CopyTo(stream);
+            }
+
+            dbProduct.ImageUrl = "/images/products/" + fileName;
+        }
+
+        _context.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // صفحه حذف محصول
+    public IActionResult Delete(int id)
+    {
+        var product = _context.Products
+            .Include(p => p.Category)
+            .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return View(product);
+    }
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        var product = _context.Products
+    .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        if (!string.IsNullOrEmpty(product.ImageUrl))
+        {
+            string imagePath = Path.Combine(
+                _environment.WebRootPath,
+                product.ImageUrl.TrimStart('/')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+        }
+
+        product.IsDeleted = true;
+        product.UpdatedAt = DateTime.Now;
+
+        _context.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
     }
 }

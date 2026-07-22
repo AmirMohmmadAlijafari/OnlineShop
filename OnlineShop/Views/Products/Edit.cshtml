@@ -1,0 +1,85 @@
+﻿@model OnlineShop.Models.Product
+
+@{
+    ViewData["Title"] = "ویرایش محصول";
+}
+
+<h2 class="mb-4">ویرایش محصول</h2>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ImageUrl" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">نام محصول</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">توضیحات</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label">قیمت</label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Stock" class="form-label">موجودی</label>
+        <input asp-for="Stock" class="form-control" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">دسته‌بندی</label>
+
+        <select asp-for="CategoryId"
+                asp-items="ViewBag.Categories"
+                class="form-select">
+        </select>
+
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <div class="mb-3">
+
+            <label class="form-label">تصویر فعلی</label>
+
+            <br />
+
+            <img src="@Model.ImageUrl"
+                 width="180"
+                 class="img-thumbnail" />
+
+        </div>
+    }
+
+    <div class="mb-3">
+
+        <label asp-for="ImageFile" class="form-label">
+            تصویر جدید
+        </label>
+
+        <input asp-for="ImageFile"
+               type="file"
+               class="form-control" />
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        ذخیره تغییرات
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        بازگشت
+    </a>
+
+</form>
+
+
