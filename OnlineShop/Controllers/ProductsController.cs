@@ -96,47 +96,42 @@ public class ProductsController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Create(Product product)
     {
-        if (product.ImageFile == null)
-        {
-            return Content("ImageFile = NULL");
-        }
-
         if (!ModelState.IsValid)
         {
-            string errors = "";
+            ViewBag.Categories = new SelectList(
+                _context.Categories,
+                "Id",
+                "Name",
+                product.CategoryId);
 
-            foreach (var item in ModelState)
+            return View(product);
+        }
+
+        
+        if (product.ImageFile != null)
+        {
+            string fileName = Guid.NewGuid().ToString() +
+                              Path.GetExtension(product.ImageFile.FileName);
+
+            string folderPath = Path.Combine(
+                _environment.WebRootPath,
+                "images",
+                "products");
+
+            if (!Directory.Exists(folderPath))
             {
-                foreach (var error in item.Value.Errors)
-                {
-                    errors += item.Key + " : " + error.ErrorMessage + "\n";
-                }
+                Directory.CreateDirectory(folderPath);
             }
 
-            return Content(errors);
+            string filePath = Path.Combine(folderPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                product.ImageFile.CopyTo(stream);
+            }
+
+            product.ImageUrl = "/images/products/" + fileName;
         }
-
-        string fileName = Guid.NewGuid().ToString() +
-                          Path.GetExtension(product.ImageFile.FileName);
-
-        string folderPath = Path.Combine(
-            _environment.WebRootPath,
-            "images",
-            "products");
-
-        if (!Directory.Exists(folderPath))
-        {
-            Directory.CreateDirectory(folderPath);
-        }
-
-        string filePath = Path.Combine(folderPath, fileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            product.ImageFile.CopyTo(stream);
-        }
-
-        product.ImageUrl = "/images/products/" + fileName;
 
         product.CreatedAt = DateTime.Now;
         product.UpdatedAt = DateTime.Now;
