@@ -1,0 +1,120 @@
+﻿@model List<OnlineShop.Models.CartItem>
+
+@{
+    ViewData["Title"] = "سبد خرید";
+}
+
+<h2 class="mb-4">سبد خرید</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        سبد خرید شما خالی است.
+    </div>
+
+    <a asp-controller="Products"
+       asp-action="Index"
+       class="btn btn-primary">
+        بازگشت به محصولات
+    </a>
+
+}
+else
+{
+    <table class="table table-bordered table-hover align-middle">
+        <thead>
+            <tr>
+                <th style="width:120px">تصویر</th>
+                <th>نام محصول</th>
+                <th>قیمت واحد</th>
+                <th style="width:170px">تعداد</th>
+                <th>مبلغ</th>
+                <th style="width:120px">عملیات</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="text-center">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl"
+                                 width="80"
+                                 height="80"
+                                 style="object-fit:cover;border-radius:8px;" />
+                        }
+                    </td>
+
+                    <td>@item.ProductName</td>
+
+                    <td>@item.Price.ToString("N0") تومان</td>
+
+                    <td>
+                        <div class="d-flex justify-content-center align-items-center gap-2">
+
+                            <a asp-action="Decrease"
+                               asp-route-id="@item.ProductId"
+                               class="btn btn-outline-danger btn-sm">
+                                -
+                            </a>
+
+                            <span class="fw-bold">@item.Quantity</span>
+
+                            <a asp-action="Increase"
+                               asp-route-id="@item.ProductId"
+                               class="btn btn-outline-success btn-sm">
+                                +
+                            </a>
+
+                        </div>
+                    </td>
+
+                    <td class="fw-bold">
+                        @item.TotalPrice.ToString("N0") تومان
+                    </td>
+
+                    <td class="text-center">
+
+                        <a asp-action="Remove"
+                           asp-route-id="@item.ProductId"
+                           class="btn btn-danger btn-sm">
+                            حذف
+                        </a>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+
+        <a asp-action="Clear"
+           class="btn btn-outline-danger">
+            خالی کردن سبد خرید
+        </a>
+
+        <h4 class="mb-0">
+            جمع کل:
+            @Model.Sum(x => x.TotalPrice).ToString("N0") تومان
+        </h4>
+
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="btn btn-secondary">
+            ادامه خرید
+        </a>
+
+        <a asp-controller="Orders" asp-action="Checkout" class="btn btn-success">
+            ادامه فرایند خرید
+        </a>
+
+    </div>
+
+}

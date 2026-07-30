@@ -104,15 +104,22 @@
 
                     <td>
 
+                        <a asp-controller="Cart"
+                           asp-action="AddToCart"
+                           asp-route-id="@item.Id"
+                           class="btn btn-primary btn-sm mb-1">
+                            افزودن به سبد خرید
+                        </a>
+
                         <a asp-action="Edit"
                            asp-route-id="@item.Id"
-                           class="btn btn-warning btn-sm">
+                           class="btn btn-warning btn-sm mb-1">
                             ویرایش
                         </a>
 
                         <a asp-action="Delete"
                            asp-route-id="@item.Id"
-                           class="btn btn-danger btn-sm">
+                           class="btn btn-danger btn-sm mb-1">
                             حذف
                         </a>
 
@@ -162,4 +169,5 @@
         </ul>
 
     </nav>
+
 }

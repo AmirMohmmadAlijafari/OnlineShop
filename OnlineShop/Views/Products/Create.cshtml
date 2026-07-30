@@ -16,88 +16,133 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-3">
-                <label asp-for="Name" class="form-label">
-                    نام محصول
-                </label>
-
+                <label asp-for="Name" class="form-label">نام محصول</label>
                 <input asp-for="Name" class="form-control" />
-
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Description" class="form-label">
-                    توضیحات
-                </label>
-
-                <textarea asp-for="Description"
-                          class="form-control"
-                          rows="4"></textarea>
-
+                <label asp-for="Description" class="form-label">توضیحات</label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Price" class="form-label">
-                    قیمت
-                </label>
+                <label asp-for="Price" class="form-label">قیمت (ریال)</label>
 
-                <input asp-for="Price" class="form-control" />
+                <input asp-for="Price"
+                       id="Price"
+                       class="form-control"
+                       autocomplete="off" />
+
+                <div id="priceHelp" class="form-text text-success mt-2 fw-bold"></div>
 
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Stock" class="form-label">
-                    موجودی
-                </label>
-
+                <label asp-for="Stock" class="form-label">موجودی</label>
                 <input asp-for="Stock" class="form-control" />
-
                 <span asp-validation-for="Stock" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="CategoryId" class="form-label">
-                    دسته بندی
-                </label>
-
+                <label asp-for="CategoryId" class="form-label">دسته‌بندی</label>
                 <select asp-for="CategoryId"
                         asp-items="ViewBag.Categories"
                         class="form-select">
-
-                    <option value="">انتخاب دسته بندی</option>
-
+                    <option value="">انتخاب دسته‌بندی</option>
                 </select>
-
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-
-                <label asp-for="ImageFile" class="form-label">
-                    تصویر محصول
-                </label>
-
-                <input asp-for="ImageFile"
-                       type="file"
-                       class="form-control" />
-
-                <span asp-validation-for="ImageFile"
-                      class="text-danger"></span>
-
+                <label asp-for="ImageFile" class="form-label">تصویر محصول</label>
+                <input asp-for="ImageFile" type="file" class="form-control" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-success">
-                ثبت محصول
-            </button>
-
-            <a asp-action="Index" class="btn btn-secondary">
-                بازگشت
-            </a>
+            <button type="submit" class="btn btn-success">ثبت محصول</button>
+            <a asp-action="Index" class="btn btn-secondary">بازگشت</a>
 
         </form>
 
     </div>
+
 </div>
 
+@section Scripts
+{
+
+    <script>
+        const priceInput = document.getElementById("Price");
+        const priceHelp = document.getElementById("priceHelp");
+
+        function numberToPersianWords(num) {
+            if (!num || num === 0) return "صفر تومان";
+
+            const ones = ["","یک","دو","سه","چهار","پنج","شش","هفت","هشت","نه"];
+            const teens = ["ده","یازده","دوازده","سیزده","چهارده","پانزده","شانزده","هفده","هجده","نوزده"];
+            const tens = ["","","بیست","سی","چهل","پنجاه","شصت","هفتاد","هشتاد","نود"];
+            const hundreds = ["","صد","دویست","سیصد","چهارصد","پانصد","ششصد","هفتصد","هشتصد","نهصد"];
+            const scales = ["","هزار","میلیون","میلیارد","تریلیون"];
+
+            function threeDigitsToWords(n) {
+                let parts = [];
+                const h = Math.floor(n / 100);
+                const t = n % 100;
+
+                if (h > 0) parts.push(hundreds[h]);
+
+                if (t >= 10 && t <= 19) {
+                    parts.push(teens[t - 10]);
+                } else {
+                    const ten = Math.floor(t / 10);
+                    const one = t % 10;
+                    if (ten > 0) parts.push(tens[ten]);
+                    if (one > 0) parts.push(ones[one]);
+                }
+
+                return parts.join(" و ");
+            }
+
+            let words = [];
+            let scaleIndex = 0;
+
+            while (num > 0) {
+                const chunk = num % 1000;
+                if (chunk > 0) {
+                    const chunkWords = threeDigitsToWords(chunk);
+                    words.unshift(chunkWords + (scales[scaleIndex] ? " " + scales[scaleIndex] : ""));
+                }
+                num = Math.floor(num / 1000);
+                scaleIndex++;
+            }
+
+            return words.join(" و ") + " تومان";
+        }
+
+        function formatPrice() {
+            let value = priceInput.value.replace(/,/g, "").replace(/\D/g, "");
+
+            if (value === "") {
+                priceHelp.textContent = "";
+                return;
+            }
+
+            priceInput.value = Number(value).toLocaleString("en-US");
+
+            const toman = Math.floor(Number(value) / 10);
+            priceHelp.textContent = numberToPersianWords(toman);
+        }
+
+        priceInput.addEventListener("input", formatPrice);
+
+        document.querySelector("form").addEventListener("submit", function () {
+            priceInput.value = priceInput.value.replace(/,/g, "");
+        });
+
+        formatPrice();
+    </script>
+
+}

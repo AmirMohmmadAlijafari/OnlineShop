@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "ثبت سفارش موفق";
+}
+
+<div class="text-center mt-5">
+
+    <div class="mb-4">
+        <i class="bi bi-check-circle-fill text-success" style="font-size:64px;"></i>
+    </div>
+
+    <h2 class="text-success mb-3">
+        سفارش شما با موفقیت ثبت شد
+    </h2>
+
+    <p class="lead">
+        از خرید شما سپاسگزاریم.
+        سفارش شما دریافت شد و در مرحله بعد برای ذخیره در دیتابیس و پیگیری سفارش تکمیل خواهد شد.
+    </p>
+
+    <a asp-controller="Products"
+       asp-action="Index"
+       class="btn btn-primary mt-3">
+        بازگشت به فروشگاه
+    </a>
+
+</div>

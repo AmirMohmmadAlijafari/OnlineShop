@@ -1,0 +1,50 @@
+﻿@model List<OnlineShop.Models.Order>
+
+@{
+    ViewData["Title"] = "سفارش‌ها";
+}
+
+<h2 class="mb-4">سفارش‌های ثبت‌شده</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        هنوز سفارشی ثبت نشده است.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>شماره سفارش</th>
+                <th>نام مشتری</th>
+                <th>تاریخ</th>
+                <th>مبلغ کل</th>
+                <th>وضعیت</th>
+                <th>جزئیات</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.CustomerName</td>
+                    <td>@order.OrderDate.ToString("yyyy/MM/dd HH:mm")</td>
+                    <td>@order.TotalAmount.ToString("N0") تومان</td>
+                    <td>@order.Status</td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@order.Id"
+                           class="btn btn-primary btn-sm">
+                            مشاهده
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
