@@ -14,7 +14,7 @@ public class OrdersController : Controller
 
     private List<CartItem> GetCart()
     {
-        var cartJson = HttpContext.Session.GetString("Cart");
+        var cartJson = Request.Cookies["Cart"];
 
         if (string.IsNullOrEmpty(cartJson))
         {
@@ -106,7 +106,7 @@ public class OrdersController : Controller
 
         _context.SaveChanges();
 
-        HttpContext.Session.Remove("Cart");
+        Response.Cookies.Delete("Cart");
 
         return RedirectToAction("Success");
     }

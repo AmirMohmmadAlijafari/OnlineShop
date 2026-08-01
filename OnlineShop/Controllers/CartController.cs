@@ -14,7 +14,7 @@ public class CartController : Controller
 
     private List<CartItem> GetCart()
     {
-        var cartJson = HttpContext.Session.GetString("Cart");
+        var cartJson = Request.Cookies["Cart"];
 
         if (string.IsNullOrEmpty(cartJson))
         {
@@ -28,7 +28,15 @@ public class CartController : Controller
     private void SaveCart(List<CartItem> cart)
     {
         var cartJson = JsonSerializer.Serialize(cart);
-        HttpContext.Session.SetString("Cart", cartJson);
+
+        var options = new CookieOptions
+        {
+            Expires = DateTime.Now.AddDays(1),
+            HttpOnly = true,
+            IsEssential = true
+        };
+
+        Response.Cookies.Append("Cart", cartJson, options);
     }
 
     // نمایش سبد خرید
@@ -156,7 +164,7 @@ public class CartController : Controller
     // خالی کردن کل سبد خرید
     public IActionResult Clear()
     {
-        HttpContext.Session.Remove("Cart");
+        Response.Cookies.Delete("Cart");
         return RedirectToAction("Index");
     }
 
