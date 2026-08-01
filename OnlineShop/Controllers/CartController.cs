@@ -35,10 +35,18 @@ public class CartController : Controller
     public IActionResult Index()
     {
         var cart = GetCart();
+
+        var stockMap = _context.Products
+            .Where(p => !p.IsDeleted)
+            .ToDictionary(p => p.Id, p => p.Stock);
+
+        ViewBag.StockMap = stockMap;
+
         return View(cart);
     }
 
     // افزودن محصول به سبد خرید
+    [HttpPost]
     public IActionResult AddToCart(int id)
     {
         var product = _context.Products
@@ -47,6 +55,12 @@ public class CartController : Controller
         if (product == null)
         {
             return NotFound();
+        }
+
+        if (product.Stock <= 0)
+        {
+            TempData["Error"] = "این محصول ناموجود است و امکان سفارش آن وجود ندارد.";
+            return RedirectToAction("Details", "Products", new { id = product.Id });
         }
 
         var cart = GetCart();
@@ -66,6 +80,12 @@ public class CartController : Controller
         }
         else
         {
+            if (item.Quantity >= product.Stock)
+            {
+                TempData["Error"] = "تعداد درخواستی بیشتر از موجودی محصول است.";
+                return RedirectToAction("Details", "Products", new { id = product.Id });
+            }
+
             item.Quantity++;
         }
 
@@ -83,8 +103,13 @@ public class CartController : Controller
 
         if (item != null)
         {
-            item.Quantity++;
-            SaveCart(cart);
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+
+            if (product != null && item.Quantity < product.Stock)
+            {
+                item.Quantity++;
+                SaveCart(cart);
+            }
         }
 
         return RedirectToAction("Index");

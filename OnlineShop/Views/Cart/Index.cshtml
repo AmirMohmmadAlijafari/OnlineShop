@@ -36,6 +36,8 @@ else
         <tbody>
             @foreach (var item in Model)
             {
+                var stock = ((Dictionary<int, int>)ViewBag.StockMap)[item.ProductId];
+
                 <tr>
                     <td class="text-center">
                         @if (!string.IsNullOrEmpty(item.ImageUrl))
@@ -54,19 +56,37 @@ else
                     <td>
                         <div class="d-flex justify-content-center align-items-center gap-2">
 
-                            <a asp-action="Decrease"
-                               asp-route-id="@item.ProductId"
-                               class="btn btn-outline-danger btn-sm">
-                                -
-                            </a>
+                            @if (item.Quantity > 1)
+                            {
+                                <a asp-action="Decrease"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-outline-danger btn-sm">
+                                    -
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    -
+                                </button>
+                            }
 
                             <span class="fw-bold">@item.Quantity</span>
 
-                            <a asp-action="Increase"
-                               asp-route-id="@item.ProductId"
-                               class="btn btn-outline-success btn-sm">
-                                +
-                            </a>
+                            @if (item.Quantity < stock)
+                            {
+                                <a asp-action="Increase"
+                                   asp-route-id="@item.ProductId"
+                                   class="btn btn-outline-success btn-sm">
+                                    +
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    +
+                                </button>
+                            }
 
                         </div>
                     </td>
@@ -76,13 +96,11 @@ else
                     </td>
 
                     <td class="text-center">
-
                         <a asp-action="Remove"
                            asp-route-id="@item.ProductId"
                            class="btn btn-danger btn-sm">
                             حذف
                         </a>
-
                     </td>
                 </tr>
             }
@@ -105,13 +123,15 @@ else
 
     <div class="mt-4 d-flex gap-2">
 
-        <a asp-controller="Products"
-           asp-action="Index"
-           class="btn btn-secondary">
+        <button type="button"
+                class="btn btn-secondary"
+                onclick="history.back()">
             ادامه خرید
-        </a>
+        </button>
 
-        <a asp-controller="Orders" asp-action="Checkout" class="btn btn-success">
+        <a asp-controller="Orders"
+           asp-action="Checkout"
+           class="btn btn-success">
             ادامه فرایند خرید
         </a>
 

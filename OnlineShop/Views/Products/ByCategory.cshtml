@@ -1,50 +1,98 @@
 ﻿@model List<OnlineShop.Models.Product>
 
 @{
-    ViewData["Title"] = "محصولات";
+    ViewData["Title"] = "محصولات دسته‌بندی";
 }
 
-<h2 class="mb-4">محصولات این دسته</h2>
+<h2 class="mb-4">محصولات دسته‌بندی</h2>
 
 @if (!Model.Any())
 {
-    <h4>محصولی برای این دسته وجود ندارد.</h4>
+    <div class="alert alert-info">
+        محصولی در این دسته‌بندی وجود ندارد.
+    </div>
 }
 else
 {
     <div class="row">
-
         @foreach (var item in Model)
         {
-            <div class="col-md-4 mb-3">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
 
-                <div class="card shadow-sm">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl"
+                             class="card-img-top"
+                             style="height:220px; object-fit:cover;" />
+                    }
 
-                    <div class="card-body">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@item.Name</h5>
 
-                        <h4>@item.Name</h4>
+                        <p class="text-muted mb-2">
+                            @item.Category?.Name
+                        </p>
 
-                        <p>
-                            قیمت:
+                        <p class="card-text">
+                            @item.Description
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>موجودی:</strong>
+                            @if (item.Stock > 0)
+                            {
+                                @item.Stock
+                            }
+                            else
+                            {
+                                <span class="text-danger fw-bold">ناموجود</span>
+                            }
+                        </p>
+
+                        <h5 class="text-success mt-auto">
                             @item.Price.ToString("N0") تومان
-                        </p>
+                        </h5>
 
-                        <p>
-                            موجودی:
-                            @item.Stock
-                        </p>
+                        <div class="d-grid gap-2 mt-3">
 
-                        <p>
-                            دسته:
-                            @item.Category.Name
-                        </p>
+                            <a asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-outline-primary">
+                                مشاهده جزئیات
+                            </a>
 
+                            @if (item.Stock > 0)
+                            {
+                                <form asp-controller="Cart"
+                                      asp-action="AddToCart"
+                                      method="post">
+
+                                    <input type="hidden" name="id" value="@item.Id" />
+
+                                    <button type="submit"
+                                            class="btn btn-success">
+                                        افزودن به سبد خرید
+                                    </button>
+
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled>
+                                    ناموجود
+                                </button>
+                            }
+
+                        </div>
                     </div>
-
                 </div>
-
             </div>
         }
-
     </div>
+
 }
+
+<button type="button" class="btn btn-secondary mt-3" onclick="history.back()">
+    بازگشت
+</button>

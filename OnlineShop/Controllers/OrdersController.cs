@@ -52,6 +52,25 @@ public class OrdersController : Controller
             return RedirectToAction("Index", "Cart");
         }
 
+        foreach (var item in cart)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId && !p.IsDeleted);
+
+            if (product == null)
+            {
+                TempData["Error"] = "یکی از محصولات دیگر وجود ندارد.";
+                return RedirectToAction("Checkout");
+            }
+
+            if (product.Stock < item.Quantity)
+            {
+                TempData["Error"] =
+                    $"موجودی محصول «{product.Name}» کافی نیست. موجودی فعلی: {product.Stock}";
+
+                return RedirectToAction("Checkout");
+            }
+        }
+
         var order = new Order
         {
             CustomerName = "مشتری مهمان",

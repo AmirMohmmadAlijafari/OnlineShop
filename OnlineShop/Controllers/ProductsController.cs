@@ -16,6 +16,7 @@ public class ProductsController : Controller
     }
 
     // نمایش محصولات یک دسته
+
     public IActionResult ByCategory(int id)
     {
         var products = _context.Products

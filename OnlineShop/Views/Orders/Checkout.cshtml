@@ -6,6 +6,13 @@
 
 <h2 class="mb-4">نهایی کردن سفارش</h2>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <table class="table table-bordered align-middle">
     <thead> <tr> <th>تصویر</th> <th>نام محصول</th> <th>قیمت</th> <th>تعداد</th> <th>مبلغ</th> </tr> </thead>
 
