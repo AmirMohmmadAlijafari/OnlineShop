@@ -123,11 +123,9 @@ else
 
     <div class="mt-4 d-flex gap-2">
 
-        <button type="button"
-                class="btn btn-secondary"
-                onclick="history.back()">
+        <a href="@ViewBag.ReturnUrl" class="btn btn-secondary">
             ادامه خرید
-        </button>
+        </a>
 
         <a asp-controller="Orders"
            asp-action="Checkout"

@@ -12,6 +12,8 @@
 
         public string? ImageUrl { get; set; }
 
+        public string? ReturnUrl { get; set; }
+
         public decimal TotalPrice
         {
             get { return Price * Quantity; }

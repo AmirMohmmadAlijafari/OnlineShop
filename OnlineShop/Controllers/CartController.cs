@@ -50,12 +50,15 @@ public class CartController : Controller
 
         ViewBag.StockMap = stockMap;
 
+        ViewBag.ReturnUrl = cart.FirstOrDefault()?.ReturnUrl
+                            ?? Url.Action("Index", "Products");
+
         return View(cart);
     }
 
     // افزودن محصول به سبد خرید
     [HttpPost]
-    public IActionResult AddToCart(int id)
+    public IActionResult AddToCart(int id, string? returnUrl)
     {
         var product = _context.Products
             .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
@@ -83,7 +86,8 @@ public class CartController : Controller
                 ProductName = product.Name,
                 Price = product.Price,
                 Quantity = 1,
-                ImageUrl = product.ImageUrl
+                ImageUrl = product.ImageUrl,
+                ReturnUrl = returnUrl
             });
         }
         else
@@ -95,6 +99,7 @@ public class CartController : Controller
             }
 
             item.Quantity++;
+            item.ReturnUrl = returnUrl;
         }
 
         SaveCart(cart);

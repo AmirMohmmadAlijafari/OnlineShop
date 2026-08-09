@@ -64,11 +64,11 @@ else
 
                             @if (item.Stock > 0)
                             {
-                                <form asp-controller="Cart"
-                                      asp-action="AddToCart"
-                                      method="post">
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post">
 
                                     <input type="hidden" name="id" value="@item.Id" />
+                                    <input type="hidden" name="returnUrl"
+                                           value="@Context.Request.Path@Context.Request.QueryString" />
 
                                     <button type="submit"
                                             class="btn btn-success">
