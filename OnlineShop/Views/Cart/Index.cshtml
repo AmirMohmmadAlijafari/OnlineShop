@@ -60,6 +60,7 @@ else
                             {
                                 <a asp-action="Decrease"
                                    asp-route-id="@item.ProductId"
+                                   asp-route-returnUrl="@ViewBag.ReturnUrl"
                                    class="btn btn-outline-danger btn-sm">
                                     -
                                 </a>
@@ -77,6 +78,7 @@ else
                             {
                                 <a asp-action="Increase"
                                    asp-route-id="@item.ProductId"
+                                   asp-route-returnUrl="@ViewBag.ReturnUrl"
                                    class="btn btn-outline-success btn-sm">
                                     +
                                 </a>
@@ -98,6 +100,7 @@ else
                     <td class="text-center">
                         <a asp-action="Remove"
                            asp-route-id="@item.ProductId"
+                           asp-route-returnUrl="@ViewBag.ReturnUrl"
                            class="btn btn-danger btn-sm">
                             حذف
                         </a>
@@ -110,6 +113,7 @@ else
     <div class="d-flex justify-content-between align-items-center mt-4">
 
         <a asp-action="Clear"
+           asp-route-returnUrl="@ViewBag.ReturnUrl"
            class="btn btn-outline-danger">
             خالی کردن سبد خرید
         </a>
@@ -123,7 +127,8 @@ else
 
     <div class="mt-4 d-flex gap-2">
 
-        <a href="@ViewBag.ReturnUrl" class="btn btn-secondary">
+        <a href="@ViewBag.ReturnUrl"
+           class="btn btn-secondary">
             ادامه خرید
         </a>
 

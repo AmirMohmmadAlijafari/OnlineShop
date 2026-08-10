@@ -40,7 +40,7 @@ public class CartController : Controller
     }
 
     // نمایش سبد خرید
-    public IActionResult Index()
+    public IActionResult Index(string? returnUrl)
     {
         var cart = GetCart();
 
@@ -49,9 +49,7 @@ public class CartController : Controller
             .ToDictionary(p => p.Id, p => p.Stock);
 
         ViewBag.StockMap = stockMap;
-
-        ViewBag.ReturnUrl = cart.FirstOrDefault()?.ReturnUrl
-                            ?? Url.Action("Index", "Products");
+        ViewBag.ReturnUrl = returnUrl ?? Url.Action("Index", "Products");
 
         return View(cart);
     }
@@ -86,8 +84,7 @@ public class CartController : Controller
                 ProductName = product.Name,
                 Price = product.Price,
                 Quantity = 1,
-                ImageUrl = product.ImageUrl,
-                ReturnUrl = returnUrl
+                ImageUrl = product.ImageUrl
             });
         }
         else
@@ -99,16 +96,15 @@ public class CartController : Controller
             }
 
             item.Quantity++;
-            item.ReturnUrl = returnUrl;
         }
 
         SaveCart(cart);
 
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { returnUrl });
     }
 
     // افزایش تعداد
-    public IActionResult Increase(int id)
+    public IActionResult Increase(int id, string? returnUrl)
     {
         var cart = GetCart();
 
@@ -125,11 +121,11 @@ public class CartController : Controller
             }
         }
 
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { returnUrl });
     }
 
     // کاهش تعداد
-    public IActionResult Decrease(int id)
+    public IActionResult Decrease(int id, string? returnUrl)
     {
         var cart = GetCart();
 
@@ -139,19 +135,19 @@ public class CartController : Controller
         {
             item.Quantity--;
 
-            if (item.Quantity <= 0)
+            if (item.Quantity <= 1)
             {
-                cart.Remove(item);
+                item.Quantity = 1;
             }
 
             SaveCart(cart);
         }
 
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { returnUrl });
     }
 
     // حذف کامل یک کالا
-    public IActionResult Remove(int id)
+    public IActionResult Remove(int id, string? returnUrl)
     {
         var cart = GetCart();
 
@@ -163,14 +159,14 @@ public class CartController : Controller
             SaveCart(cart);
         }
 
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { returnUrl });
     }
 
     // خالی کردن کل سبد خرید
-    public IActionResult Clear()
+    public IActionResult Clear(string? returnUrl)
     {
         Response.Cookies.Delete("Cart");
-        return RedirectToAction("Index");
+        return RedirectToAction("Index", new { returnUrl });
     }
 
 }
