@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineShop.Models
 {
@@ -7,20 +6,23 @@ namespace OnlineShop.Models
     {
         public int Id { get; set; }
 
-        [MaxLength(100)]
-        public string CustomerName { get; set; } = "مشتری مهمان";
+        public string? UserId { get; set; }
 
-        [MaxLength(20)]
-        public string CustomerPhone { get; set; } = "-";
+        public ApplicationUser? User { get; set; }
 
-        [Column(TypeName = "decimal(18,0)")]
-        public decimal TotalAmount { get; set; }
+        [Required]
+        public string CustomerName { get; set; } = string.Empty;
+
+        [Required]
+        public string CustomerPhone { get; set; } = string.Empty;
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
+        public decimal TotalAmount { get; set; }
+
         public string Status { get; set; } = "ثبت شده";
 
-        public List<OrderItem> OrderItems { get; set; } = new();
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 
 }

@@ -1,0 +1,55 @@
+﻿@model List<OnlineShop.Models.Order>
+
+@{
+    ViewData["Title"] = "سفارش‌های من";
+}
+
+<h2 class="mb-4">سفارش‌های من</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        شما تاکنون سفارشی ثبت نکرده‌اید.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>شماره سفارش</th>
+                <th>تاریخ سفارش</th>
+                <th>مبلغ کل</th>
+                <th>وضعیت</th>
+                <th>جزئیات</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.OrderDate.ToString("yyyy/MM/dd HH:mm")</td>
+                    <td>@item.TotalAmount.ToString("N0") تومان</td>
+                    <td>
+                        <span class="badge bg-success">
+                            @item.Status
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@item.Id"
+                           asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString"
+                           class="btn btn-outline-primary btn-sm">
+                            مشاهده
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3"> بازگشت به صفحه اصلی </a>

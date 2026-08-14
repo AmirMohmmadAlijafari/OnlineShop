@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineShop.Data;
 
@@ -11,9 +12,11 @@ using OnlineShop.Data;
 namespace OnlineShop.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812105030_AddIdentity")]
+    partial class AddIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,38 +265,38 @@ namespace OnlineShop.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6651),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(1989),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "لپ تاپ",
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6666)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2001)
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6670),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2004),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "موبایل",
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6670)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2005)
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6671),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2006),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "مانیتور",
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6672)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2007)
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6673),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2009),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "تبلت",
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(6673)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2009)
                         });
                 });
 
@@ -307,11 +310,13 @@ namespace OnlineShop.Migrations
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
@@ -321,14 +326,9 @@ namespace OnlineShop.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -416,97 +416,97 @@ namespace OnlineShop.Migrations
                         {
                             Id = 1,
                             CategoryId = 1,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7097),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2127),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Laptop Dell",
                             Price = 35000000m,
                             Stock = 5,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7097)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2127)
                         },
                         new
                         {
                             Id = 2,
                             CategoryId = 1,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7105),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2134),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "HP Laptop",
                             Price = 42000000m,
                             Stock = 7,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7106)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2134)
                         },
                         new
                         {
                             Id = 3,
                             CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7108),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2137),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Samsung S25",
                             Price = 58000000m,
                             Stock = 12,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7108)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2137)
                         },
                         new
                         {
                             Id = 4,
                             CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7110),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2139),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "iPhone 17",
                             Price = 98000000m,
                             Stock = 4,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7111)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2139)
                         },
                         new
                         {
                             Id = 5,
                             CategoryId = 3,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7112),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2141),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "LG 27 Inch",
                             Price = 15000000m,
                             Stock = 10,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7113)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2142)
                         },
                         new
                         {
                             Id = 6,
                             CategoryId = 3,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7115),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2143),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Samsung Odyssey",
                             Price = 23000000m,
                             Stock = 6,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7115)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2144)
                         },
                         new
                         {
                             Id = 7,
                             CategoryId = 4,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7117),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2146),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "iPad Air",
                             Price = 47000000m,
                             Stock = 8,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7117)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2146)
                         },
                         new
                         {
                             Id = 8,
                             CategoryId = 4,
-                            CreatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7119),
+                            CreatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2148),
                             IsActive = true,
                             IsDeleted = false,
                             Name = "Galaxy Tab S10",
                             Price = 36000000m,
                             Stock = 9,
-                            UpdatedAt = new DateTime(2026, 8, 12, 14, 44, 34, 965, DateTimeKind.Local).AddTicks(7119)
+                            UpdatedAt = new DateTime(2026, 8, 12, 14, 20, 30, 238, DateTimeKind.Local).AddTicks(2148)
                         });
                 });
 
@@ -591,15 +591,6 @@ namespace OnlineShop.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Parent");
-                });
-
-            modelBuilder.Entity("OnlineShop.Models.Order", b =>
-                {
-                    b.HasOne("OnlineShop.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OnlineShop.Models.OrderItem", b =>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnlineShop.Data;
@@ -16,18 +17,20 @@ public class ProductsController : Controller
     }
 
     // نمایش محصولات یک دسته
-
+    [AllowAnonymous]
     public IActionResult ByCategory(int id)
     {
         var products = _context.Products
-            .Include(p => p.Category)
-            .Where(p => p.CategoryId == id && !p.IsDeleted)
-            .ToList();
+        .Include(p => p.Category)
+        .Where(p => p.CategoryId == id && !p.IsDeleted)
+        .ToList();
 
         return View(products);
+
     }
 
     // لیست محصولات
+    [AllowAnonymous]
     public IActionResult Index(string search, int? categoryId, int page = 1)
     {
         int pageSize = 5;
@@ -68,11 +71,12 @@ public class ProductsController : Controller
     }
 
     // جزئیات محصول
-    public IActionResult Details(int id)
+    [AllowAnonymous]
+    public IActionResult Details(int id, string? returnUrl)
     {
         var product = _context.Products
-            .Include(p => p.Category)
-            .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+        .Include(p => p.Category)
+        .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
 
         if (product == null)
         {
@@ -80,49 +84,36 @@ public class ProductsController : Controller
         }
 
         return View(product);
+
     }
 
-    // فرم افزودن محصول
+    // فرم افزودن محصول (فقط ادمین)
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
-        ViewBag.Categories = new SelectList(
-            _context.Categories,
-            "Id",
-            "Name");
-
+        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
         return View();
     }
-    // ثبت محصول جدید
+
+    // ثبت محصول جدید (فقط ادمین)
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public IActionResult Create(Product product)
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Categories = new SelectList(
-                _context.Categories,
-                "Id",
-                "Name",
-                product.CategoryId);
-
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
             return View(product);
         }
 
-        
         if (product.ImageFile != null)
         {
-            string fileName = Guid.NewGuid().ToString() +
-                              Path.GetExtension(product.ImageFile.FileName);
-
-            string folderPath = Path.Combine(
-                _environment.WebRootPath,
-                "images",
-                "products");
+            string fileName = Guid.NewGuid() + Path.GetExtension(product.ImageFile.FileName);
+            string folderPath = Path.Combine(_environment.WebRootPath, "images", "products");
 
             if (!Directory.Exists(folderPath))
-            {
                 Directory.CreateDirectory(folderPath);
-            }
 
             string filePath = Path.Combine(folderPath, fileName);
 
@@ -145,49 +136,35 @@ public class ProductsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // فرم ویرایش محصول
+    // فرم ویرایش محصول (فقط ادمین)
+    [Authorize(Roles = "Admin")]
     public IActionResult Edit(int id)
     {
-        var product = _context.Products
-     .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+        var product = _context.Products.FirstOrDefault(p => p.Id == id && !p.IsDeleted);
 
         if (product == null)
-        {
             return NotFound();
-        }
 
-        ViewBag.Categories = new SelectList(
-            _context.Categories,
-            "Id",
-            "Name",
-            product.CategoryId);
-
+        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
         return View(product);
     }
 
-    // ویرایش محصول
+    // ویرایش محصول (فقط ادمین)
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public IActionResult Edit(Product product)
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Categories = new SelectList(
-                _context.Categories,
-                "Id",
-                "Name",
-                product.CategoryId);
-
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
             return View(product);
         }
 
-        var dbProduct = _context.Products
-    .FirstOrDefault(p => p.Id == product.Id && !p.IsDeleted);
+        var dbProduct = _context.Products.FirstOrDefault(p => p.Id == product.Id && !p.IsDeleted);
 
         if (dbProduct == null)
-        {
             return NotFound();
-        }
 
         dbProduct.Name = product.Name;
         dbProduct.Description = product.Description;
@@ -206,23 +183,14 @@ public class ProductsController : Controller
                     dbProduct.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
 
                 if (System.IO.File.Exists(oldImagePath))
-                {
                     System.IO.File.Delete(oldImagePath);
-                }
             }
 
-            string fileName = Guid.NewGuid().ToString() +
-                              Path.GetExtension(product.ImageFile.FileName);
-
-            string folderPath = Path.Combine(
-                _environment.WebRootPath,
-                "images",
-                "products");
+            string fileName = Guid.NewGuid() + Path.GetExtension(product.ImageFile.FileName);
+            string folderPath = Path.Combine(_environment.WebRootPath, "images", "products");
 
             if (!Directory.Exists(folderPath))
-            {
                 Directory.CreateDirectory(folderPath);
-            }
 
             string filePath = Path.Combine(folderPath, fileName);
 
@@ -239,7 +207,8 @@ public class ProductsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // صفحه حذف محصول
+    // صفحه حذف محصول (فقط ادمین)
+    [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
         var product = _context.Products
@@ -247,35 +216,30 @@ public class ProductsController : Controller
             .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
 
         if (product == null)
-        {
             return NotFound();
-        }
 
         return View(product);
     }
+
+    // حذف محصول (فقط ادمین)
     [HttpPost, ActionName("Delete")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public IActionResult DeleteConfirmed(int id)
     {
-        var product = _context.Products
-    .FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+        var product = _context.Products.FirstOrDefault(p => p.Id == id && !p.IsDeleted);
 
         if (product == null)
-        {
             return NotFound();
-        }
 
         if (!string.IsNullOrEmpty(product.ImageUrl))
         {
             string imagePath = Path.Combine(
                 _environment.WebRootPath,
-                product.ImageUrl.TrimStart('/')
-                    .Replace("/", Path.DirectorySeparatorChar.ToString()));
+                product.ImageUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
 
             if (System.IO.File.Exists(imagePath))
-            {
                 System.IO.File.Delete(imagePath);
-            }
         }
 
         product.IsDeleted = true;
@@ -285,4 +249,5 @@ public class ProductsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
 }

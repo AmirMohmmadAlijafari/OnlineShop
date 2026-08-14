@@ -1,158 +1,193 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using OnlineShop.Data;
 using OnlineShop.Models;
 using System.Text.Json;
 
-public class OrdersController : Controller
+namespace OnlineShop.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public OrdersController(ApplicationDbContext context)
+    [Authorize]
+    public class OrdersController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-    private List<CartItem> GetCart()
-    {
-        var cartJson = Request.Cookies["Cart"];
-
-        if (string.IsNullOrEmpty(cartJson))
+        public OrdersController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
-            return new List<CartItem>();
+            _context = context;
+            _userManager = userManager;
         }
 
-        return JsonSerializer.Deserialize<List<CartItem>>(cartJson)
-               ?? new List<CartItem>();
-    }
-
-    // صفحه نهایی کردن سفارش
-    public IActionResult Checkout()
-    {
-        var cart = GetCart();
-
-        if (!cart.Any())
+        private List<CartItem> GetCart()
         {
-            return RedirectToAction("Index", "Cart");
-        }
+            var cartJson = Request.Cookies["Cart"];
 
-        ViewBag.Total = cart.Sum(x => x.TotalPrice);
-
-        return View(cart);
-    }
-
-    // ثبت سفارش در دیتابیس
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult PlaceOrder()
-    {
-        var cart = GetCart();
-
-        if (!cart.Any())
-        {
-            return RedirectToAction("Index", "Cart");
-        }
-
-        foreach (var item in cart)
-        {
-            var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId && !p.IsDeleted);
-
-            if (product == null)
+            if (string.IsNullOrEmpty(cartJson))
             {
-                TempData["Error"] = "یکی از محصولات دیگر وجود ندارد.";
-                return RedirectToAction("Checkout");
+                return new List<CartItem>();
             }
 
-            if (product.Stock < item.Quantity)
-            {
-                TempData["Error"] =
-                    $"موجودی محصول «{product.Name}» کافی نیست. موجودی فعلی: {product.Stock}";
-
-                return RedirectToAction("Checkout");
-            }
+            return JsonSerializer.Deserialize<List<CartItem>>(cartJson)
+                   ?? new List<CartItem>();
         }
 
-        var order = new Order
+        // صفحه نهایی کردن سفارش
+        public IActionResult Checkout()
         {
-            CustomerName = "مشتری مهمان",
-            CustomerPhone = "-",
-            OrderDate = DateTime.Now,
-            Status = "ثبت شده",
-            TotalAmount = cart.Sum(x => x.TotalPrice)
-        };
+            var cart = GetCart();
 
-        _context.Orders.Add(order);
-        _context.SaveChanges();
-
-        foreach (var item in cart)
-        {
-            var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId);
-
-            if (product != null)
+            if (!cart.Any())
             {
-                product.Stock -= item.Quantity;
+                return RedirectToAction("Index", "Cart");
+            }
 
-                var orderItem = new OrderItem
+            ViewBag.Total = cart.Sum(x => x.TotalPrice);
+
+            return View(cart);
+        }
+
+        // ثبت سفارش در دیتابیس
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder()
+        {
+            var cart = GetCart();
+
+            if (!cart.Any())
+            {
+                return RedirectToAction("Index", "Cart");
+            }
+
+            foreach (var item in cart)
+            {
+                var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId && !p.IsDeleted);
+
+                if (product == null)
                 {
-                    OrderId = order.Id,
-                    ProductId = product.Id,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.Price,
-                    TotalPrice = item.TotalPrice
-                };
+                    TempData["Error"] = "یکی از محصولات دیگر وجود ندارد.";
+                    return RedirectToAction("Checkout");
+                }
 
-                _context.OrderItems.Add(orderItem);
+                if (product.Stock < item.Quantity)
+                {
+                    TempData["Error"] =
+                        $"موجودی محصول «{product.Name}» کافی نیست. موجودی فعلی: {product.Stock}";
+
+                    return RedirectToAction("Checkout");
+                }
             }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var order = new Order
+            {
+                UserId = currentUser?.Id,
+                CustomerName = currentUser?.FullName ?? "کاربر",
+                CustomerPhone = "-",
+                OrderDate = DateTime.Now,
+                Status = "ثبت شده",
+                TotalAmount = cart.Sum(x => x.TotalPrice)
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            foreach (var item in cart)
+            {
+                var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId);
+
+                if (product != null)
+                {
+                    product.Stock -= item.Quantity;
+
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        ProductId = product.Id,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.Price,
+                        TotalPrice = item.TotalPrice
+                    };
+
+                    _context.OrderItems.Add(orderItem);
+                }
+            }
+
+            _context.SaveChanges();
+
+            Response.Cookies.Delete("Cart");
+
+            return RedirectToAction("Success");
         }
 
-        _context.SaveChanges();
+        // صفحه موفقیت سفارش
+        public IActionResult Success()
+        {
+            return View();
+        }
 
-        Response.Cookies.Delete("Cart");
+        public async Task<IActionResult> MyOrders()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
 
-        return RedirectToAction("Success");
-    }
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-    // صفحه موفقیت سفارش
-    public IActionResult Success()
-    {
-        return View();
-    }
+            var orders = _context.Orders
+                .Where(o => o.UserId == currentUser.Id)
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
 
-    // لیست سفارش‌ها
-    public IActionResult Index()
-    {
-        var orders = _context.Orders
-            .OrderByDescending(o => o.OrderDate)
-            .ToList();
+            return View(orders);
+        }
 
-        return View(orders);
-    }
+        // لیست سفارش‌ها (فقط برای ادمین)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Index()
+        {
+            var orders = _context.Orders
+                .OrderByDescending(o => o.OrderDate)
+                .ToList();
 
-    // جزئیات سفارش
-    public IActionResult Details(int id)
-    {
-        var order = _context.Orders
+            return View(orders);
+        }
+
+        // جزئیات سفارش
+
+        public IActionResult Details(int id, string? returnUrl)
+        {
+            var order = _context.Orders
             .Where(o => o.Id == id)
             .Select(o => new
             {
                 Order = o,
                 Items = _context.OrderItems
-                    .Where(oi => oi.OrderId == o.Id)
-                    .Select(oi => new
-                    {
-                        oi.Quantity,
-                        oi.UnitPrice,
-                        oi.TotalPrice,
-                        ProductName = oi.Product.Name
-                    }).ToList()
+            .Where(oi => oi.OrderId == o.Id)
+            .Select(oi => new
+            {
+                oi.Quantity,
+                oi.UnitPrice,
+                oi.TotalPrice,
+                ProductName = oi.Product.Name
+            }).ToList()
             })
             .FirstOrDefault();
 
-        if (order == null)
-        {
-            return NotFound();
-        }
+            if (order == null)
+            {
+                return NotFound();
+            }
 
-        return View(order);
+            ViewBag.ReturnUrl = returnUrl ?? Url.Action("MyOrders", "Orders");
+
+            return View(order);
+
+        }
     }
 
 }
