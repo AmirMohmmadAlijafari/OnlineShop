@@ -6,72 +6,145 @@
 
 <div class="row justify-content-center">
     <div class="col-md-6">
+
         <div class="card shadow">
-            <div class="card-header bg-primary text-white"> <h3 class="mb-0">ثبت نام</h3> </div>
+
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">
+                    ثبت نام
+                </h3>
+            </div>
 
             <div class="card-body">
 
-                <form asp-action="Register" method="post">
+                <form asp-action="Register"
+                      method="post">
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    @Html.AntiForgeryToken()
 
-                    <div class="mb-3">
-                        <label asp-for="FullName" class="form-label"></label>
-                        <input asp-for="FullName" class="form-control" />
-                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    <input type="hidden"
+                           name="returnUrl"
+                           value="@ViewBag.ReturnUrl" />
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="UserName" class="form-label"></label>
-                        <input asp-for="UserName" class="form-control" />
-                        <span asp-validation-for="UserName" class="text-danger"></span>
+
+                        <label asp-for="FullName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="FullName"
+                               class="form-control" />
+
+                        <span asp-validation-for="FullName"
+                              class="text-danger">
+                        </span>
+
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" id="registerPassword" type="password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+
+                        <label asp-for="UserName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="UserName"
+                               class="form-control" />
+
+                        <span asp-validation-for="UserName"
+                              class="text-danger">
+                        </span>
+
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="ConfirmPassword" class="form-label"></label>
-                        <input asp-for="ConfirmPassword" class="form-control" id="confirmPassword" type="password" />
-                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+                        <label asp-for="Password"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Password"
+                               class="form-control"
+                               id="registerPassword"
+                               type="password" />
+
+                        <span asp-validation-for="Password"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="ConfirmPassword"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="ConfirmPassword"
+                               class="form-control"
+                               id="confirmPassword"
+                               type="password" />
+
+                        <span asp-validation-for="ConfirmPassword"
+                              class="text-danger">
+                        </span>
+
                     </div>
 
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="showRegisterPassword" />
-                        <label class="form-check-label" for="showRegisterPassword">
+
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="showRegisterPassword" />
+
+                        <label class="form-check-label"
+                               for="showRegisterPassword">
                             نمایش رمز عبور
                         </label>
+
                     </div>
 
-                    <button type="submit" class="btn btn-success w-100">
+                    <button type="submit"
+                            class="btn btn-success w-100">
                         ثبت نام
                     </button>
 
                 </form>
 
                 <div class="text-center mt-3">
-                    <a asp-action="Login">حساب کاربری دارید؟ وارد شوید</a>
+
+                    <a asp-action="Login"
+                       asp-route-returnUrl="@ViewBag.ReturnUrl">
+                        حساب کاربری دارید؟ وارد شوید
+                    </a>
+
                 </div>
 
             </div>
-        </div>
-    </div>
 
+        </div>
+
+    </div>
 </div>
 
+<script>
+    document
+        .getElementById("showRegisterPassword")
+        .addEventListener("change", function () {
 
-    <script>
-        document.getElementById("showRegisterPassword").addEventListener("change", function () {
-            const passwordInput = document.getElementById("registerPassword");
-            const confirmPasswordInput = document.getElementById("confirmPassword");
+            const passwordInput =
+                document.getElementById("registerPassword");
 
-            const type = this.checked ? "text" : "password";
+            const confirmPasswordInput =
+                document.getElementById("confirmPassword");
+
+            const type =
+                this.checked ? "text" : "password";
 
             passwordInput.type = type;
             confirmPasswordInput.type = type;
         });
-    </script>
-
+</script>

@@ -20,18 +20,28 @@ namespace OnlineShop.Controllers
         }
 
         // صفحه ثبت نام
-        public IActionResult Register()
+        [AllowAnonymous]
+        public IActionResult Register(string? returnUrl)
         {
+            ViewBag.ReturnUrl = returnUrl;
+
             return View();
         }
 
         // ثبت نام کاربر
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(
+            RegisterViewModel model,
+            string? returnUrl)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.ReturnUrl = returnUrl;
+
                 return View(model);
+            }
 
             var user = new ApplicationUser
             {
@@ -40,36 +50,66 @@ namespace OnlineShop.Controllers
                 Email = $"{model.UserName}@shop.local"
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(
+                user,
+                model.Password);
 
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Customer");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Home");
+                await _userManager.AddToRoleAsync(
+                    user,
+                    "Customer");
+
+                await _signInManager.SignInAsync(
+                    user,
+                    isPersistent: false);
+
+                if (!string.IsNullOrEmpty(returnUrl) &&
+                    Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction(
+                    "Index",
+                    "Home");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
+
+            ViewBag.ReturnUrl = returnUrl;
 
             return View(model);
         }
 
         // صفحه ورود
-        public IActionResult Login()
+        [AllowAnonymous]
+        public IActionResult Login(string? returnUrl)
         {
+            ViewBag.ReturnUrl = returnUrl;
+
             return View();
         }
 
         // ورود کاربر
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(
+            LoginViewModel model,
+            string? returnUrl)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.ReturnUrl = returnUrl;
+
                 return View(model);
+            }
 
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName,
@@ -79,18 +119,35 @@ namespace OnlineShop.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                if (!string.IsNullOrEmpty(returnUrl) &&
+                    Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction(
+                    "Index",
+                    "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "نام کاربری یا رمز عبور اشتباه است.");
+            ModelState.AddModelError(
+                string.Empty,
+                "نام کاربری یا رمز عبور اشتباه است.");
+
+            ViewBag.ReturnUrl = returnUrl;
+
             return View(model);
         }
 
         // خروج کاربر
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+
+            return RedirectToAction(
+                "Index",
+                "Home");
         }
 
         // صفحه عدم دسترسی
@@ -137,10 +194,13 @@ namespace OnlineShop.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        public async Task<IActionResult> EditProfile(
+            EditProfileViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -158,13 +218,18 @@ namespace OnlineShop.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(user);
-                TempData["Success"] = "اطلاعات پروفایل با موفقیت به‌روزرسانی شد.";
+
+                TempData["Success"] =
+                    "اطلاعات پروفایل با موفقیت به‌روزرسانی شد.";
+
                 return RedirectToAction("Profile");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
 
             return View(model);
@@ -181,10 +246,13 @@ namespace OnlineShop.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        public async Task<IActionResult> ChangePassword(
+            ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -201,17 +269,21 @@ namespace OnlineShop.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(user);
-                TempData["Success"] = "رمز عبور با موفقیت تغییر یافت.";
+
+                TempData["Success"] =
+                    "رمز عبور با موفقیت تغییر یافت.";
+
                 return RedirectToAction("Profile");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
 
             return View(model);
         }
     }
-
 }

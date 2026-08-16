@@ -7,7 +7,6 @@ using System.Text.Json;
 
 namespace OnlineShop.Controllers
 {
-    [Authorize]
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -34,7 +33,7 @@ namespace OnlineShop.Controllers
                    ?? new List<CartItem>();
         }
 
-        // صفحه نهایی کردن سفارش
+        [AllowAnonymous]
         public IActionResult Checkout()
         {
             var cart = GetCart();
@@ -44,13 +43,24 @@ namespace OnlineShop.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return RedirectToAction(
+                    "Register",
+                    "Account",
+                    new
+                    {
+                        returnUrl = Url.Action("Checkout", "Orders")
+                    });
+            }
+
             ViewBag.Total = cart.Sum(x => x.TotalPrice);
 
             return View(cart);
         }
 
-        // ثبت سفارش در دیتابیس
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder()
         {
@@ -63,7 +73,10 @@ namespace OnlineShop.Controllers
 
             foreach (var item in cart)
             {
-                var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId && !p.IsDeleted);
+                var product = _context.Products
+                    .FirstOrDefault(p =>
+                        p.Id == item.ProductId &&
+                        !p.IsDeleted);
 
                 if (product == null)
                 {
@@ -82,10 +95,21 @@ namespace OnlineShop.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
 
+            if (currentUser == null)
+            {
+                return RedirectToAction(
+                    "Register",
+                    "Account",
+                    new
+                    {
+                        returnUrl = Url.Action("Checkout", "Orders")
+                    });
+            }
+
             var order = new Order
             {
-                UserId = currentUser?.Id,
-                CustomerName = currentUser?.FullName ?? "کاربر",
+                UserId = currentUser.Id,
+                CustomerName = currentUser.FullName,
                 CustomerPhone = "-",
                 OrderDate = DateTime.Now,
                 Status = "ثبت شده",
@@ -97,7 +121,8 @@ namespace OnlineShop.Controllers
 
             foreach (var item in cart)
             {
-                var product = _context.Products.FirstOrDefault(p => p.Id == item.ProductId);
+                var product = _context.Products
+                    .FirstOrDefault(p => p.Id == item.ProductId);
 
                 if (product != null)
                 {
@@ -123,12 +148,13 @@ namespace OnlineShop.Controllers
             return RedirectToAction("Success");
         }
 
-        // صفحه موفقیت سفارش
+        [Authorize]
         public IActionResult Success()
         {
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> MyOrders()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -146,7 +172,7 @@ namespace OnlineShop.Controllers
             return View(orders);
         }
 
-        // لیست سفارش‌ها (فقط برای ادمین)
+        // مدیریت سفارش‌ها - فقط ادمین
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
@@ -158,36 +184,43 @@ namespace OnlineShop.Controllers
         }
 
         // جزئیات سفارش
-
+        [Authorize]
         public IActionResult Details(int id, string? returnUrl)
         {
             var order = _context.Orders
-            .Where(o => o.Id == id)
-            .Select(o => new
-            {
-                Order = o,
-                Items = _context.OrderItems
-            .Where(oi => oi.OrderId == o.Id)
-            .Select(oi => new
-            {
-                oi.Quantity,
-                oi.UnitPrice,
-                oi.TotalPrice,
-                ProductName = oi.Product.Name
-            }).ToList()
-            })
-            .FirstOrDefault();
+                .Where(o => o.Id == id)
+                .Select(o => new
+                {
+                    Order = o,
+
+                    Items = _context.OrderItems
+                        .Where(oi => oi.OrderId == o.Id)
+                        .Select(oi => new
+                        {
+                            oi.Quantity,
+                            oi.UnitPrice,
+                            oi.TotalPrice,
+                            ProductName = oi.Product.Name
+                        })
+                        .ToList()
+                })
+                .FirstOrDefault();
 
             if (order == null)
             {
                 return NotFound();
             }
 
-            ViewBag.ReturnUrl = returnUrl ?? Url.Action("MyOrders", "Orders");
+            var finalReturnUrl = string.IsNullOrEmpty(returnUrl)
+                ? Url.Action("MyOrders", "Orders")
+                : returnUrl;
 
-            return View(order);
-
+            return View(new
+            {
+                Order = order.Order,
+                Items = order.Items,
+                ReturnUrl = finalReturnUrl
+            });
         }
     }
-
 }

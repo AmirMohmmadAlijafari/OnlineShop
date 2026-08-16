@@ -14,7 +14,15 @@
 }
 
 <table class="table table-bordered align-middle">
-    <thead> <tr> <th>تصویر</th> <th>نام محصول</th> <th>قیمت</th> <th>تعداد</th> <th>مبلغ</th> </tr> </thead>
+    <thead>
+        <tr>
+            <th>تصویر</th>
+            <th>نام محصول</th>
+            <th>قیمت</th>
+            <th>تعداد</th>
+            <th>مبلغ</th>
+        </tr>
+    </thead>
 
     <tbody>
         @foreach (var item in Model)
@@ -29,25 +37,41 @@
                     }
                 </td>
 
-                <td>@item.ProductName</td>
+                <td>
+                    @item.ProductName
+                </td>
 
-                <td>@item.Price.ToString("N0") تومان</td>
+                <td>
+                    @item.Price.ToString("N0") تومان
+                </td>
 
-                <td>@item.Quantity</td>
+                <td>
+                    @item.Quantity
+                </td>
 
-                <td>@item.TotalPrice.ToString("N0") تومان</td>
+                <td>
+                    @item.TotalPrice.ToString("N0") تومان
+                </td>
             </tr>
         }
     </tbody>
-
 </table>
 
-<div class="text-end mt-3"> <h4> مبلغ قابل پرداخت: @ViewBag.Total.ToString("N0") تومان </h4> </div>
+<div class="text-end mt-3">
+    <h4>
+        مبلغ قابل پرداخت:
+        @ViewBag.Total.ToString("N0") تومان
+    </h4>
+</div>
 
-<form asp-action="PlaceOrder" method="post" class="mt-4">
+<form asp-action="PlaceOrder"
+      method="post"
+      class="mt-4">
+
     @Html.AntiForgeryToken()
 
-    <button type="submit" class="btn btn-success btn-lg">
+    <button type="submit"
+            class="btn btn-success btn-lg">
         ثبت نهایی سفارش
     </button>
 

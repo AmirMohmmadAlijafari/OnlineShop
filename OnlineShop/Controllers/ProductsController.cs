@@ -87,7 +87,7 @@ public class ProductsController : Controller
 
     }
 
-    // فرم افزودن محصول (فقط ادمین)
+    // فرم افزودن محصول فقط ادمین
     [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
@@ -95,7 +95,7 @@ public class ProductsController : Controller
         return View();
     }
 
-    // ثبت محصول جدید (فقط ادمین)
+    // ثبت محصول جدید فقط ادمین
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
@@ -136,7 +136,7 @@ public class ProductsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // فرم ویرایش محصول (فقط ادمین)
+    // فرم ویرایش محصول فقط ادمین
     [Authorize(Roles = "Admin")]
     public IActionResult Edit(int id)
     {
@@ -149,7 +149,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
-    // ویرایش محصول (فقط ادمین)
+    // ویرایش محصول فقط ادمین
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
@@ -207,7 +207,7 @@ public class ProductsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // صفحه حذف محصول (فقط ادمین)
+    // صفحه حذف محصول فقط ادمین
     [Authorize(Roles = "Admin")]
     public IActionResult Delete(int id)
     {
@@ -221,7 +221,7 @@ public class ProductsController : Controller
         return View(product);
     }
 
-    // حذف محصول (فقط ادمین)
+    // حذف محصول فقط ادمین
     [HttpPost, ActionName("Delete")]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]

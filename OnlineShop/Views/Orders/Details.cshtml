@@ -4,25 +4,75 @@
     ViewData["Title"] = "جزئیات سفارش";
 }
 
-<h2 class="mb-4">جزئیات سفارش شماره @Model.Order.Id</h2>
+<h2 class="mb-4">
+    جزئیات سفارش شماره @Model.Order.Id
+</h2>
 
-<div class="mb-4"> <p><strong>مشتری:</strong> @Model.Order.CustomerName</p> <p><strong>تاریخ سفارش:</strong> @Model.Order.OrderDate.ToString("yyyy/MM/dd HH:mm")</p> <p><strong>وضعیت:</strong> @Model.Order.Status</p> <p><strong>مبلغ کل:</strong> @Model.Order.TotalAmount.ToString("N0") تومان</p> </div>
+<div class="mb-4">
+
+    <p>
+        <strong>مشتری:</strong>
+        @Model.Order.CustomerName
+    </p>
+
+    <p>
+        <strong>تاریخ سفارش:</strong>
+        @Model.Order.OrderDate.ToString("yyyy/MM/dd HH:mm")
+    </p>
+
+    <p>
+        <strong>وضعیت:</strong>
+        @Model.Order.Status
+    </p>
+
+    <p>
+        <strong>مبلغ کل:</strong>
+        @Model.Order.TotalAmount.ToString("N0") تومان
+    </p>
+
+</div>
 
 <table class="table table-bordered">
-    <thead> <tr> <th>محصول</th> <th>تعداد</th> <th>قیمت واحد</th> <th>مبلغ</th> </tr> </thead>
+
+    <thead>
+        <tr>
+            <th>محصول</th>
+            <th>تعداد</th>
+            <th>قیمت واحد</th>
+            <th>مبلغ</th>
+        </tr>
+    </thead>
 
     <tbody>
+
         @foreach (var item in Model.Items)
         {
             <tr>
-                <td>@item.ProductName</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("N0") تومان</td>
-                <td>@item.TotalPrice.ToString("N0") تومان</td>
+
+                <td>
+                    @item.ProductName
+                </td>
+
+                <td>
+                    @item.Quantity
+                </td>
+
+                <td>
+                    @item.UnitPrice.ToString("N0") تومان
+                </td>
+
+                <td>
+                    @item.TotalPrice.ToString("N0") تومان
+                </td>
+
             </tr>
         }
+
     </tbody>
 
 </table>
 
-<a href="@ViewBag.ReturnUrl" class="btn btn-secondary"> بازگشت </a>
+<a href="@Model.ReturnUrl"
+   class="btn btn-secondary">
+    بازگشت به مدیریت سفارش‌ها
+</a>

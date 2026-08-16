@@ -8,16 +8,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
+
     options.AccessDeniedPath = "/Account/AccessDenied";
+
+    options.ExpireTimeSpan = TimeSpan.FromDays(60);
+
+    options.SlidingExpiration = true;
+
+    options.Cookie.HttpOnly = true;
+
+    options.Cookie.IsEssential = true;
 });
 
 builder.Services.AddDistributedMemoryCache();
@@ -33,23 +43,32 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager =
+        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    string[] roles = { "Admin", "Customer" };
+    var userManager =
+        scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    string[] roles =
+    {
+        "Admin",
+        "Customer"
+    };
 
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            await roleManager.CreateAsync(
+                new IdentityRole(role));
         }
     }
 
     string adminUsername = "admin";
     string adminPassword = "Admin@123";
 
-    var adminUser = await userManager.FindByNameAsync(adminUsername);
+    var adminUser =
+        await userManager.FindByNameAsync(adminUsername);
 
     if (adminUser == null)
     {
@@ -61,14 +80,18 @@ using (var scope = app.Services.CreateScope())
             EmailConfirmed = true
         };
 
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        var result =
+            await userManager.CreateAsync(
+                adminUser,
+                adminPassword);
 
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(adminUser, "Admin");
+            await userManager.AddToRoleAsync(
+                adminUser,
+                "Admin");
         }
     }
-
 }
 
 if (!app.Environment.IsDevelopment())
@@ -78,6 +101,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -85,10 +109,11 @@ app.UseRouting();
 app.UseSession();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
-name: "default",
-pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
